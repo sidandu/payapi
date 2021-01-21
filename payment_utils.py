@@ -2,12 +2,16 @@ import requests
 import calendar
 from datetime import datetime
 
-class payment_input_validator:
+class PaymentInputValidator:
     def __init__(self, data):
-        # all the methods uses self.data for payment proessing
         self.data = data
 
     def __sum_digits(self, digit):
+        '''
+        calculate the single digit sum of the given number
+        :param digit: digit
+        :return: single number sum
+        '''
         if digit < 10:
             return digit
         else:
@@ -15,6 +19,12 @@ class payment_input_validator:
             return sum
 
     def __validate(self, cc_num):
+        '''
+        Validate the credit card number using Luhn's Algorithm
+        :param cc_num: credit card number
+        :return: true or false
+        '''
+
         # reverse the credit card number
         cc_num = cc_num[::-1]
         # convert to integer list
@@ -35,11 +45,13 @@ class payment_input_validator:
         # return True or False
         return sum_of_digits % 10 == 0
 
-    # Request data validation
+
     def validate_payment_info(self):
-        print(self.data)
+        '''
+        Validate payment inputs provided by the api
+        :return: error dict if any, else empty dict
+        '''
         data_check = {}
-        
         #Input keys validation
         in_keys = list(self.data.keys())
         if 'card_cvv' in in_keys:
@@ -67,8 +79,8 @@ class payment_input_validator:
                 expiry_dt = self.data['card_expiry'].split("-")
                 expiry_y = int(expiry_dt[1])
                 expiry_m = int(expiry_dt[0])
-                expiry_d = calendar.monthrange(expiry_y,expiry_m)[1]
-                if datetime(expiry_y,expiry_m,expiry_d) < datetime.now():
+                expiry_d = calendar.monthrange(expiry_y, expiry_m)[1]
+                if datetime(expiry_y, expiry_m,expiry_d) < datetime.now():
                     data_check['card_expiry'] = "Expiry date cannot be past"           
             else:
                 data_check['card_expiry'] = "Invalid Expiry date format"
@@ -83,5 +95,4 @@ class payment_input_validator:
             #Card holder name validation
             if not self.data['card_holder'].replace(" ", "").isalpha():
                 data_check['card_holder'] = "Invalid card holder name"
-
         return data_check
